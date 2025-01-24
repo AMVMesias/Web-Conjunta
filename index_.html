@@ -6,6 +6,14 @@
     <title>Document</title>
 </head>
 <body>
+    <h1>Libros Disponibles</h1>
+    <ul id="libros-disponibles"></ul>
+
+    <h1>Libros Prestados</h1>
+    <ul id="libros-prestados"></ul>
+
+    <input type="text" id="buscar" placeholder="Buscar libros..." oninput="buscarLibros()">
+
     <script>
         class Libro {
             constructor(titulo, autor, genero, fechaPublicacion, estado) {
@@ -32,30 +40,116 @@
             new Libro('La Odisea', 'Homero', 'Épica', '800 a.C.', 'Disponible')
         ];
 
-         // Función para prestar un libro
-         function prestarLibro(titulo) {
-            const index = libros.findIndex(libro => libro.titulo === titulo && libro.estado === 'Disponible');
-            if (index !== -1) {
-                libros[index].estado = 'Prestado';
-                librosPrestados.push(libros[index]);
-                console.log(Libro prestado: ${titulo});
-            } else {
-                console.log(El libro "${titulo}" no está disponible para préstamo.);
-            }
+        const librosPrestados = [];
+
+        // Función para prestar un libro
+        function prestarLibro(titulo) {
+            return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    const index = libros.findIndex(libro => libro.titulo === titulo && libro.estado === 'Disponible');
+                    if (index !== -1) {
+                        libros[index].estado = 'Prestado';
+                        librosPrestados.push(libros[index]);
+                        actualizarListas();
+                        resolve(Libro reservado: ${titulo});
+                    } else {
+                        reject(El libro "${titulo}" no está disponible para reserva.);
+                    }
+                }, 2000); // Simula un tiempo de espera de 2 segundos
+            });
         }
 
-        //Función para devolver un libro
-        function devolverLibro(titulo) {
-            const index = librosPrestados.findIndex(libro => libro.titulo === titulo);
-            if (index !== -1) {
-                librosPrestados[index].estado = 'Disponible';
-                libros.push(librosPrestados.splice(index, 1)[0]);
-                console.log(Libro devuelto: ${titulo});
-            } else {
-                console.log(El libro "${titulo}" no está en la lista de libros prestados.);
-            }
-
+        // Función para devolver un libro
+        function devolverLibroAsync(titulo) {
+            return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    const index = librosPrestados.findIndex(libro => libro.titulo === titulo);
+                    if (index !== -1) {
+                        librosPrestados[index].estado = 'Disponible';
+                        libros.push(librosPrestados.splice(index, 1)[0]);
+                        actualizarListas();
+                        resolve(Libro devuelto: ${titulo});
+                    } else {
+                        reject(El libro "${titulo}" no está en la lista de libros prestados.);
+                    }
+                }, 2000); // Simula un tiempo de espera de 2 segundos
+            });
         }
+
+        // Función para filtrar libros por título, autor o género
+        function filtrarLibros(criterio, valor) {
+            return libros.filter(libro => libro[criterio].toLowerCase().includes(valor.toLowerCase()));
+        }
+
+        // Función para actualizar las listas de libros en el DOM
+        function actualizarListas() {
+            const listaLibrosDisponibles = document.getElementById('libros-disponibles');
+            const listaLibrosPrestados = document.getElementById('libros-prestados');
+
+            listaLibrosDisponibles.innerHTML = '';
+            listaLibrosPrestados.innerHTML = '';
+
+            libros.forEach(libro => {
+                if (libro.estado === 'Disponible') {
+                    const li = document.createElement('li');
+                    li.textContent = ${libro.titulo} - ${libro.autor};
+                    listaLibrosDisponibles.appendChild(li);
+                }
+            });
+
+            librosPrestados.forEach(libro => {
+                const li = document.createElement('li');
+                li.textContent = ${libro.titulo} - ${libro.autor};
+                listaLibrosPrestados.appendChild(li);
+            });
+        }
+
+        // Función para buscar libros
+        function buscarLibros() {
+            const valor = document.getElementById('buscar').value;
+            const librosFiltrados = filtrarLibros('titulo', valor);
+            actualizarListaFiltrada(librosFiltrados);
+        }
+
+        // Función para actualizar la lista filtrada de libros en el DOM
+        function actualizarListaFiltrada(librosFiltrados) {
+            const listaLibrosDisponibles = document.getElementById('libros-disponibles');
+            listaLibrosDisponibles.innerHTML = '';
+
+            librosFiltrados.forEach(libro => {
+                if (libro.estado === 'Disponible') {
+                    const li = document.createElement('li');
+                    li.textContent = ${libro.titulo} - ${libro.autor};
+                    listaLibrosDisponibles.appendChild(li);
+                }
+            });
+        }
+
+        // Inicializar las listas en el DOM
+        actualizarListas();
+
+        // Función para enviar recordatorios automáticos de devolución
+        function enviarRecordatorios() {
+            librosPrestados.forEach(libro => {
+                console.log(Recordatorio: Por favor, devuelva el libro "${libro.titulo}");
+            });
+        }
+
+        // Enviar recordatorios cada 10 segundos
+        setInterval(enviarRecordatorios, 10000);
+
+        // Ejemplo de uso
+        reservarLibro('El Quijote')
+            .then(mensaje => {
+                console.log(mensaje);
+                return devolverLibroAsync('El Quijote');
+            })
+            .then(mensaje => {
+                console.log(mensaje);
+            })
+            .catch(error => {
+                console.error(error);
+            });
     </script>
 </body>
 </html>
