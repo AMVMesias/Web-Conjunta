@@ -25,6 +25,37 @@
                 this.telefono = telefono;
             }
         }
+
+        const libros = [
+            new Libro('El Quijote', 'Miguel de Cervantes', 'Novela', '1605', 'Disponible'),
+            new Libro('Cien Años de Soledad', 'Gabriel García Márquez', 'Novela', '1967', 'Prestado'),
+            new Libro('La Odisea', 'Homero', 'Épica', '800 a.C.', 'Disponible')
+        ];
+
+         // Función para prestar un libro
+         function prestarLibro(titulo) {
+            const index = libros.findIndex(libro => libro.titulo === titulo && libro.estado === 'Disponible');
+            if (index !== -1) {
+                libros[index].estado = 'Prestado';
+                librosPrestados.push(libros[index]);
+                console.log(Libro prestado: ${titulo});
+            } else {
+                console.log(El libro "${titulo}" no está disponible para préstamo.);
+            }
+        }
+
+        //Función para devolver un libro
+        function devolverLibro(titulo) {
+            const index = librosPrestados.findIndex(libro => libro.titulo === titulo);
+            if (index !== -1) {
+                librosPrestados[index].estado = 'Disponible';
+                libros.push(librosPrestados.splice(index, 1)[0]);
+                console.log(Libro devuelto: ${titulo});
+            } else {
+                console.log(El libro "${titulo}" no está en la lista de libros prestados.);
+            }
+
+        }
     </script>
 </body>
 </html>
